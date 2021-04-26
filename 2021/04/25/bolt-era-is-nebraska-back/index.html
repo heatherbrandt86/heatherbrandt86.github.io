@@ -118,8 +118,7 @@ nu &lt;- runs %&gt;% filter(School == &quot;Nebraska&quot; &amp; Season == &quot
   )</code></pre>
 <p><img src="/2021/04/25/bolt-era-is-nebraska-back/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /> As you can tell from the above chart Nebraska isn't allowing a lot of runs but they aren't scoring that many either.</p>
 <p>So, what are some contributing factors behind Nebraska not allowing many runs? Is it strikouts? Or maybe it's something else?</p>
-<pre class="r"><code>thisseason&lt;- teampitching %&gt;% 
-  filter(Season == &quot;2021&quot;, Conference == &quot;Big Ten&quot;)
+<pre class="r"><code>thisseason&lt;- teampitching %&gt;% filter(Season == &quot;2021&quot;, Conference == &quot;Big Ten&quot;)
 ggplot() + 
   geom_dumbbell(
     data=thisseason, 
