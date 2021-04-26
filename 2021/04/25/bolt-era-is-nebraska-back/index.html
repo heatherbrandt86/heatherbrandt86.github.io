@@ -62,7 +62,7 @@
 
   <article class="article">
     
-    <span class="article-duration">1 min read</span>
+    <span class="article-duration">3 min read</span>
     
 
     <h1 class="article-title">Bolt Era: Is Nebraska back?</h1>
@@ -75,22 +75,52 @@
       
 
 
+<p>After only 15 games the 2020 season ended abruptly on March 12, 2020, due to COVID-19. At that time the Huskers were on a three game winning streak and had won six of their last seven games.</p>
+<p>It had 359 days between the end of the 2020 season and the start of the 2021 season. To say Husker fans are glad to be back at Hawks Field cheering on the Huskers would be a huge understatement.</p>
 <pre class="r"><code>library(tidyverse)
-library(ggalt)</code></pre>
+library(ggalt)
+library(ggplot2)
+library(ggrepel)</code></pre>
 <pre class="r"><code>teamhitting &lt;- read_csv(&quot;Baseball Hitting Stats.csv&quot;)
 teampitching &lt;- read_csv(&quot;Baseball Pitching Stats.csv&quot;)</code></pre>
-<pre class="r"><code>runsscored &lt;- teamhitting %&gt;% rename(RunsScored = R) %&gt;% select(Season, School, RunsScored) 
-runsallowed &lt;- teampitching %&gt;% select(Season, School, R) %&gt;% rename(RunsAllowed = R)
+<p>If you have been paying attention at all to the baseball team, you would know they are currently sitting at the top of the Big Ten Standings in first place.</p>
+<p>But just how good are the Huskers?</p>
+<p>Well first let's take a look at their runs scored vs. runs allowed.</p>
+<pre class="r"><code>runsscored &lt;- teamhitting %&gt;% rename(RunsScored = R) %&gt;% 
+  select(Season, School, RunsScored) 
+runsallowed &lt;- teampitching %&gt;%
+  select(Season, School, R) %&gt;% 
+  rename(RunsAllowed = R)
 
-runs &lt;- runsscored %&gt;% full_join(runsallowed) %&gt;% mutate(SchoolSeason = paste(School, Season, sep=&quot; &quot;))</code></pre>
+runs &lt;- runsscored %&gt;% full_join(runsallowed) %&gt;% 
+  mutate(SchoolSeason = paste(School, Season, sep=&quot; &quot;))</code></pre>
 <pre><code>## Joining, by = c(&quot;Season&quot;, &quot;School&quot;)</code></pre>
 <pre class="r"><code>current &lt;- runs %&gt;% filter(Season == &quot;2021&quot;)
 nu &lt;- runs %&gt;% filter(School == &quot;Nebraska&quot; &amp; Season == &quot;2021&quot;)</code></pre>
-<pre class="r"><code>ggplot() + geom_point(data=current, aes(x=RunsScored, y=RunsAllowed)) +
-  geom_point(data=nu, aes(x=RunsScored, y=RunsAllowed), color=&quot;red&quot;)</code></pre>
-<p><img src="/2021/04/25/bolt-era-is-nebraska-back/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<pre class="r"><code>thisseason&lt;- teampitching %&gt;% filter(Season == &quot;2021&quot;, Conference == &quot;Big Ten&quot;)</code></pre>
 <pre class="r"><code>ggplot() + 
+  geom_hline(yintercept=175, color=&quot;dark grey&quot;) + 
+  geom_vline(xintercept=160, color=&quot;dark grey&quot;) +
+  geom_point(data=current, aes(x=RunsScored, y=RunsAllowed)) +
+  geom_point(data=nu, aes(x=RunsScored, y=RunsAllowed), color=&quot;red&quot;, size=3) +
+  geom_text_repel(data=nu, aes(x=RunsScored, y=RunsAllowed, label= School)) +
+  labs(x=&quot;Runs Scored&quot;, y=&quot;Runs Allowed&quot;, 
+       title=&quot;Just how good is Nebraska Baseball?&quot;, 
+       subtitle=&quot;Nebraska isn&#39;t allowing a lot of runs, but they aren&#39;t scoring a lot either.&quot;,
+       caption=&quot;Source: NCAA.Org | By Heather Brandt&quot;)+
+  theme_minimal()+
+  theme(
+    plot.title = element_text(size = 16, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 7),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank()
+  )</code></pre>
+<p><img src="/2021/04/25/bolt-era-is-nebraska-back/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /> As you can tell from the above chart Nebraska isn't allowing a lot of runs but they aren't scoring that many either.</p>
+<p>So, what are some contributing factors behind Nebraska not allowing many runs? Is it strikouts? Or maybe it's something else?</p>
+<pre class="r"><code>thisseason&lt;- teampitching %&gt;% 
+  filter(Season == &quot;2021&quot;, Conference == &quot;Big Ten&quot;)
+ggplot() + 
   geom_dumbbell(
     data=thisseason, 
     aes(y=reorder(School,SO), x=SO, xend=BB),
@@ -98,17 +128,38 @@ nu &lt;- runs %&gt;% filter(School == &quot;Nebraska&quot; &amp; Season == &quot
 colour = &quot;light gray&quot;,
     colour_x = &quot;black&quot;,
     colour_xend = &quot;red&quot;)+
+  labs(y=&quot;Team&quot;, x= &quot;Strikeouts/Walks&quot;, 
+       title = &quot;What&#39;s the key to Husker&#39;s success?&quot;, 
+subtitle =&quot;Surprisingly their pitching is showing alot of promise.&quot;) +
   theme_minimal()+
-  labs(y=&quot;Strikouts&quot;, x= &quot;Team&quot;, 
-       title = &quot;Husker&#39;s Pitching Showing Promise&quot;, 
-subtitle =&quot;&quot;)</code></pre>
-<p><img src="/2021/04/25/bolt-era-is-nebraska-back/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
-<pre class="r"><code>lastsixseasons&lt;- teamhitting %&gt;% filter(School == &quot;Nebraska&quot;)
-
-
+  theme(
+    plot.title = element_text(size = 16, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 7),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank()
+  )</code></pre>
+<p><img src="/2021/04/25/bolt-era-is-nebraska-back/index_files/figure-html/unnamed-chunk-5-1.png" width="672" /> Many have been surpised by the Husker pitchers this year. Nebraska has currently struck out 251 batters compared to their opponents 250. Nebraska has also only walked 82 batters compared to their opponents 140. I would say the pitchers are having a pretty good year.</p>
+<p>The last thing I wanted to look at is the Huskers on-base percentage.</p>
+<p>As you can see in 2016 the Huskers weren't getting on base often, but through the years they have been headed in an upward direction as more players are getting on base. You can't score if you don't get on base.</p>
+<p>It's still early but if Nebraska keeps playing the way they are there is a good chance they will claim the Big Ten title and we may just seem them in the regionals.</p>
+<pre class="r"><code>lastsixseasons&lt;- teamhitting %&gt;% 
+  filter(School == &quot;Nebraska&quot;)
 ggplot() + 
-  geom_line(data=lastsixseasons, aes(x=Season, y=OBPct))</code></pre>
-<p><img src="/2021/04/25/bolt-era-is-nebraska-back/index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+  geom_line(data=lastsixseasons, 
+  aes(x=Season, y=OBPct), color=&quot;red&quot;)+
+  labs(y=&quot;On-base Percentage&quot;, x= &quot;Season&quot;, 
+   title = &quot;How does Nebraska compare to past 6 seaons?&quot;, 
+subtitle =&quot;It looks like Nebraska is on an upward trend.&quot;) +
+  theme_minimal()+
+  theme(
+    plot.title = element_text(size = 16, face = &quot;bold&quot;),
+    axis.title = element_text(size = 10),
+    axis.text = element_text(size = 7),
+    axis.ticks = element_blank(),
+    panel.grid.minor = element_blank()
+  )</code></pre>
+<p><img src="/2021/04/25/bolt-era-is-nebraska-back/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 
     </div>
   </article>
